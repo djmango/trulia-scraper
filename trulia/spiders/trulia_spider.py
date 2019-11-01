@@ -6,29 +6,37 @@ import sys
 from datetime import datetime
 
 import scrapy
+import scrapy_splash
 from scrapy.linkextractors import LinkExtractor
 
 from trulia.items import TruItem
 
+# https://bhttq3cj-splash.scrapinghub.com
+
+# 585b3c57893547138d008be6b6321be9
+
 logger = logging.getLogger('scrapy')
 logger.setLevel(logging.INFO)
-
 
 class TruliaSpider(scrapy.Spider):
     name = 'truliaspider'
     allowed_domains = ["trulia.com"]
+    http_user = '585b3c57893547138d008be6b6321be9'
 
-    def __init__(self, state='TX', city='Arlington', *args, **kwargs):
+    def __init__(self, STATE='TX', CITY='Arlington', *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.state = state
-        self.city = city
+        self.STATE = STATE
+        self.CITY = CITY
         self.start_urls = [
-            'http://trulia.com/{state}/{city}'.format(state=state, city=city)]
+            'http://trulia.com/{STATE}/{CITY}'.format(STATE=STATE, CITY=CITY)]
         self.le = LinkExtractor(allow=r'^https://www.trulia.com/p/')
 
     def last_pagenumber_in_search(self, response):
-        """ Returns the number of the last page on the city/locale page """
+        """ Returns the number of the last page on the CITY/locale page """
         resultsHtml = response.xpath('.//*/text()[contains(., " Results")]')
+        if resultsHtml[0].root is None:
+            logging.info('Got captcha page..')
+            return 0
         logger.info(resultsHtml[0].root[:-8][8:] + " results to scrape..")
         number_of_results = int(resultsHtml[0].root[:-8][8:].replace(',', ''))
         # return math.ceil(number_of_results/30)
@@ -54,17 +62,10 @@ class TruliaSpider(scrapy.Spider):
         # SCRAPE_DATE PHONE EMAIL CONTACT NAME CITY STATE ADDRESS TYPE ID
         # 3/27/2019 0:00:00 3473274001 if@available.ok Jane Doe Brooklyn NY 1122 Mill Ave #1 single_family_home 81083cfa-e683-41cd-ae3e-83fcfb352bc0
 
-        # TODO: okay so we got xpath working and simplified stuff, so now all we gotta do
-        # is to make sure the phone number is there and then add the rest of the data
-        # then figure out how to integrate into scrapinghub
         item['scrape_time'] = datetime.now().strftime("%x %X")
-        # TODO:this isnt working in code for some reason, look into it, shell works
-        item['phone'] = response.xpath('//div[@data-testid="agent-phone"]/text()').get() 
         item['address'] = response.xpath('//span[@class="Text__TextBase-sc-1i9uasc-0 fxMXms"]/text()').get()
         item['url'] = response.url
-
-        # if there is no phone number, discard the entry
-        if item['phone'] is None:
-            yield None
-        else:
-            yield item
+        filename = response.url.split("/")[-1] + '.html'
+        with open('resp/' + filename, 'wb') as f:
+            f.write(response.body)
+        yield item
