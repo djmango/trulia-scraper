@@ -65,6 +65,6 @@ class TruliaSpider(scrapy.Spider):
         # filename = response.url.split("/")[-1] + '.html'
         # with open('resp/' + filename, 'wb') as f:
         #     f.write(response.body)
-        get('https://script.google.com/a/trintals.com/macros/s/AKfycbx6svCa1pojkQulIhQVqoKOVCg4Mo_MqtVvTJRNwoA-/dev',
+        get('https://script.google.com/macros/s/AKfycbxG7CgR4ecvr5ZF025Q945KJEr1HcEJAQJ6o-kvK_Rb1Zop3TRw/exec',
             params={'scrape_date': item['scrape_time'], 'address': item['address']})
         yield item
