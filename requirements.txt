@@ -1,3 +1,2 @@
 scrapy
 scrapyjs
-scrapy-splash

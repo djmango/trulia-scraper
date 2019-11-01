@@ -6,22 +6,19 @@ import sys
 from datetime import datetime
 
 import scrapy
+from requests import get
 import scrapy_splash
 from scrapy.linkextractors import LinkExtractor
 
 from trulia.items import TruItem
 
-# https://bhttq3cj-splash.scrapinghub.com
-
-# 585b3c57893547138d008be6b6321be9
-
 logger = logging.getLogger('scrapy')
 logger.setLevel(logging.INFO)
+
 
 class TruliaSpider(scrapy.Spider):
     name = 'truliaspider'
     allowed_domains = ["trulia.com"]
-    http_user = '585b3c57893547138d008be6b6321be9'
 
     def __init__(self, STATE='TX', CITY='Arlington', *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,10 +59,12 @@ class TruliaSpider(scrapy.Spider):
         # SCRAPE_DATE PHONE EMAIL CONTACT NAME CITY STATE ADDRESS TYPE ID
         # 3/27/2019 0:00:00 3473274001 if@available.ok Jane Doe Brooklyn NY 1122 Mill Ave #1 single_family_home 81083cfa-e683-41cd-ae3e-83fcfb352bc0
 
-        item['scrape_time'] = datetime.now().strftime("%x %X")
-        item['address'] = response.xpath('//span[@class="Text__TextBase-sc-1i9uasc-0 fxMXms"]/text()').get()
-        item['url'] = response.url
-        filename = response.url.split("/")[-1] + '.html'
-        with open('resp/' + filename, 'wb') as f:
-            f.write(response.body)
+        item['scrape_time'] = str(datetime.now().strftime("%x %X"))
+        item['address'] = str(response.xpath('//span[@class="Text__TextBase-sc-1i9uasc-0 fxMXms"]/text()').get())
+        item['url'] = str(response.url)
+        # filename = response.url.split("/")[-1] + '.html'
+        # with open('resp/' + filename, 'wb') as f:
+        #     f.write(response.body)
+        get('https://script.google.com/a/trintals.com/macros/s/AKfycbx6svCa1pojkQulIhQVqoKOVCg4Mo_MqtVvTJRNwoA-/dev',
+            params={'scrape_date': item['scrape_time'], 'address': item['address']})
         yield item

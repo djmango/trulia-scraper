@@ -1,1 +1,0 @@
-scrapy shell https://www.trulia.com/p/tx/arlington/2420-sutton-dr-arlington-tx-76018--2067248102 -s USER_AGENT='e'
