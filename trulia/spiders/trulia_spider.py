@@ -1,13 +1,11 @@
-import json
 import logging
-import math
 import re
 import sys
 from datetime import datetime
+from math import ceil
 
 import scrapy
 from requests import get
-import scrapy_splash
 from scrapy.linkextractors import LinkExtractor
 
 from trulia.items import TruItem
@@ -31,15 +29,16 @@ class TruliaSpider(scrapy.Spider):
     def last_pagenumber_in_search(self, response):
         """ Returns the number of the last page on the CITY/locale page """
         resultsHtml = response.xpath('.//*/text()[contains(., " Results")]')
-        if resultsHtml[0].root is None:
-            logging.info('Got captcha page..')
+        try:
+            logger.info(resultsHtml[0].root[:-8][8:] + " results to scrape..")
+            number_of_results = int(resultsHtml[0].root[:-8][8:].replace(',', ''))
+            # return ceil(number_of_results/30)
+            # this works but for now we dont wanna trip things so low
+            # TODO: remove this, its just debug
+            return 1
+        except:
             return 0
-        logger.info(resultsHtml[0].root[:-8][8:] + " results to scrape..")
-        number_of_results = int(resultsHtml[0].root[:-8][8:].replace(',', ''))
-        # return math.ceil(number_of_results/30)
-        # this works but for now we dont wanna trip things so low
-        # TODO: remove this, its just debug
-        return 1
+  
 
     def parse(self, response):
         last_page_number = self.last_pagenumber_in_search(response)
@@ -60,11 +59,22 @@ class TruliaSpider(scrapy.Spider):
         # 3/27/2019 0:00:00 3473274001 if@available.ok Jane Doe Brooklyn NY 1122 Mill Ave #1 single_family_home 81083cfa-e683-41cd-ae3e-83fcfb352bc0
 
         item['scrape_time'] = str(datetime.now().strftime("%x %X"))
+        
+        # get city
+        r = re.compile('[^,]+')
+        e = r.findall(str(response.xpath('//span[@class="HomeSummaryShared__CityStateAddress-vqaylf-0 fyHNRA Text__TextBase-sc-1i9uasc-0 dGyGqt"]/text()').get()))
+        item['city'] = e[0]
+        
+        # get state
+        r = re.compile('[A-Z]{2}')
+        e = r.findall(str(response.xpath('//span[@class="HomeSummaryShared__CityStateAddress-vqaylf-0 fyHNRA Text__TextBase-sc-1i9uasc-0 dGyGqt"]/text()').get()))
+        item['state'] = e[0]
+
+        # get address
         item['address'] = str(response.xpath('//span[@class="Text__TextBase-sc-1i9uasc-0 fxMXms"]/text()').get())
         item['url'] = str(response.url)
-        # filename = response.url.split("/")[-1] + '.html'
-        # with open('resp/' + filename, 'wb') as f:
-        #     f.write(response.body)
+        item['listing_id'] = item['url']
+
         get('https://script.google.com/macros/s/AKfycbxG7CgR4ecvr5ZF025Q945KJEr1HcEJAQJ6o-kvK_Rb1Zop3TRw/exec',
             params={'scrape_date': item['scrape_time'], 'address': item['address']})
         yield item
