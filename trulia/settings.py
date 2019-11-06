@@ -14,6 +14,10 @@ BOT_NAME = 'trulia'
 SPIDER_MODULES = ['trulia.spiders']
 NEWSPIDER_MODULE = 'trulia.spiders'
 
+# spider config for Trulia
+STATE = 'TX'
+CITY = 'Arlington'
+
 ITEM_PIPELINES = {'trulia.pipelines.DuplicatesPipeline':100,
 					'trulia.pipelines.WriteItemPipeline':200, }
 
@@ -54,12 +58,15 @@ DOWNLOAD_DELAY = 1
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#     'scrapy_splash.SplashCookiesMiddleware': 723,
-#     'scrapy_splash.SplashMiddleware': 725,
-#     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
-#     'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware': 101,
-# }
+
+DOWNLOADER_MIDDLEWARES = {'scrapy_crawlera.CrawleraMiddleware': 610}
+CRAWLERA_ENABLED = True
+CRAWLERA_APIKEY = '9da59caa0a36491f9735c7523187d62f'
+
+CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS_PER_DOMAIN = 32
+AUTOTHROTTLE_ENABLED = False
+DOWNLOAD_TIMEOUT = 600
 
 # SPLASH_URL = 'https://bhttq3cj-splash.scrapinghub.com'
 

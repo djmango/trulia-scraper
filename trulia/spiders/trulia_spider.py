@@ -9,6 +9,7 @@ from requests import get
 from scrapy.linkextractors import LinkExtractor
 
 from trulia.items import TruItem
+from trulia.settings import STATE, CITY
 
 logger = logging.getLogger('scrapy')
 logger.setLevel(logging.INFO)
@@ -18,7 +19,7 @@ class TruliaSpider(scrapy.Spider):
     name = 'truliaspider'
     allowed_domains = ["trulia.com"]
 
-    def __init__(self, STATE='TX', CITY='Arlington', *args, **kwargs):
+    def __init__(self, STATE=STATE, CITY=STATE, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.STATE = STATE
         self.CITY = CITY
