@@ -19,12 +19,12 @@ class TruliaSpider(scrapy.Spider):
     name = 'truliaspider'
     allowed_domains = ["trulia.com"]
 
-    def __init__(self, STATE=STATE, CITY=STATE, *args, **kwargs):
+    def __init__(self, STATE=STATE, CITY=CITY, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.STATE = STATE
         self.CITY = CITY
         self.start_urls = [
-            'http://trulia.com/{STATE}/{CITY}'.format(STATE=STATE, CITY=CITY)]
+            'https://trulia.com/{STATE}/{CITY}'.format(STATE=STATE, CITY=CITY)]
         self.le = LinkExtractor(allow=r'^https://www.trulia.com/p/')
 
     def last_pagenumber_in_search(self, response):
