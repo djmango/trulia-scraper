@@ -1,3 +1,2 @@
-scrapy
-scrapyjs
+scrapy==1.8.0
 scrapy-crawlera
