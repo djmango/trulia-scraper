@@ -9,7 +9,7 @@ from requests import get
 from scrapy.linkextractors import LinkExtractor
 
 from trulia.items import TruItem
-from trulia.settings import STATE, CITY
+from trulia.settings import CITY, GOOGLE_SCRIPT_URL, STATE
 
 logger = logging.getLogger('scrapy')
 logger.setLevel(logging.INFO)
@@ -32,11 +32,11 @@ class TruliaSpider(scrapy.Spider):
         resultsHtml = response.xpath('.//*/text()[contains(., " Results")]')
         try:
             logger.info(resultsHtml[0].root[:-8][8:] + " results to scrape..")
-            number_of_results = int(resultsHtml[0].root[:-8][8:].replace(',', ''))
+            number_of_results = int(
+                resultsHtml[0].root[:-8][8:].replace(',', ''))
             return ceil(number_of_results/30)
         except:
             return 0
-  
 
     def parse(self, response):
         last_page_number = self.last_pagenumber_in_search(response)
@@ -57,22 +57,25 @@ class TruliaSpider(scrapy.Spider):
         # 3/27/2019 0:00:00 3473274001 if@available.ok Jane Doe Brooklyn NY 1122 Mill Ave #1 single_family_home 81083cfa-e683-41cd-ae3e-83fcfb352bc0
 
         item['scrape_time'] = str(datetime.now().strftime("%x %X"))
-        
+
         # get city
         r = re.compile('[^,]+')
-        e = r.findall(str(response.xpath('//span[@class="HomeSummaryShared__CityStateAddress-vqaylf-0 fyHNRA Text__TextBase-sc-1i9uasc-0 dGyGqt"]/text()').get()))
+        e = r.findall(str(response.xpath(
+            '//span[@class="HomeSummaryShared__CityStateAddress-vqaylf-0 fyHNRA Text__TextBase-sc-1i9uasc-0 dGyGqt"]/text()').get()))
         item['city'] = e[0]
-        
+
         # get state
         r = re.compile('[A-Z]{2}')
-        e = r.findall(str(response.xpath('//span[@class="HomeSummaryShared__CityStateAddress-vqaylf-0 fyHNRA Text__TextBase-sc-1i9uasc-0 dGyGqt"]/text()').get()))
+        e = r.findall(str(response.xpath(
+            '//span[@class="HomeSummaryShared__CityStateAddress-vqaylf-0 fyHNRA Text__TextBase-sc-1i9uasc-0 dGyGqt"]/text()').get()))
         item['state'] = e[0]
 
         # get address
-        item['address'] = str(response.xpath('//span[@class="Text__TextBase-sc-1i9uasc-0 fxMXms"]/text()').get())
+        item['address'] = str(response.xpath(
+            '//span[@class="Text__TextBase-sc-1i9uasc-0 fxMXms"]/text()').get())
         item['url'] = str(response.url)
         item['listing_id'] = item['url']
 
-        get('https://script.google.com/macros/s/AKfycbxG7CgR4ecvr5ZF025Q945KJEr1HcEJAQJ6o-kvK_Rb1Zop3TRw/exec',
-            params={'scrape_date': item['scrape_time'], 'city': item['city'], 'state': item['state'], 'address': item['address']})
+        get(GOOGLE_SCRIPT_URL, params={
+            'scrape_date': item['scrape_time'], 'city': item['city'], 'state': item['state'], 'address': item['address']})
         yield item

@@ -17,6 +17,7 @@ NEWSPIDER_MODULE = 'trulia.spiders'
 # spider config for Trulia
 STATE = 'TX'
 CITY = 'Arlington'
+GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxG7CgR4ecvr5ZF025Q945KJEr1HcEJAQJ6o-kvK_Rb1Zop3TRw/exec'
 
 ITEM_PIPELINES = {'trulia.pipelines.DuplicatesPipeline':100,
 					'trulia.pipelines.WriteItemPipeline':200, }
