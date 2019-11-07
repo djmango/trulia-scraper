@@ -74,5 +74,5 @@ class TruliaSpider(scrapy.Spider):
         item['listing_id'] = item['url']
 
         get('https://script.google.com/macros/s/AKfycbxG7CgR4ecvr5ZF025Q945KJEr1HcEJAQJ6o-kvK_Rb1Zop3TRw/exec',
-            params={'scrape_date': item['scrape_time'], 'address': item['address']})
+            params={'scrape_date': item['scrape_time'], 'city': item['city'], 'state': item['state'], 'address': item['address']})
         yield item
