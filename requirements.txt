@@ -1,5 +1,5 @@
 attrs>=17.4.0
 zope.interface>=4.4.2
 w3lib>=1.19.0
-scrapy==1.7.3
+scrapy==1.6.0
 scrapy-crawlera
