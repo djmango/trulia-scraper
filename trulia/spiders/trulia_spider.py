@@ -33,10 +33,7 @@ class TruliaSpider(scrapy.Spider):
         try:
             logger.info(resultsHtml[0].root[:-8][8:] + " results to scrape..")
             number_of_results = int(resultsHtml[0].root[:-8][8:].replace(',', ''))
-            # return ceil(number_of_results/30)
-            # this works but for now we dont wanna trip things so low
-            # TODO: remove this, its just debug
-            return 1
+            return ceil(number_of_results/30)
         except:
             return 0
   
